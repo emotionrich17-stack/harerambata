@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HareamBot Elite</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a', /* Slate-900 */
+                        cardbg: '#1e293b', /* Slate-800 */
+                        primary: '#3b82f6', /* Blue-500 */
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-gray-50 text-slate-800 transition-colors duration-300 h-[100dvh] flex flex-col overflow-hidden">
+
+    <!-- Snowfall Overlay -->
+    <div id="snow-overlay"></div>
+
+    <!-- Header -->
+    <header
+        class="h-16 flex items-center justify-between px-6 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-darkbg/80 backdrop-blur-md z-20 relative">
+        <h1 class="font-bold text-xl tracking-tight flex items-center gap-2">
+            <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">HareamBot</span>
+            <span
+                class="text-xs uppercase tracking-widest bg-gray-100 dark:bg-white/10 px-2 py-1 rounded text-gray-500 dark:text-gray-300">Elite</span>
+        </h1>
+
+        <div class="flex items-center gap-3">
+            <!-- Incognito Toggle -->
+            <button onclick="App.toggleIncognito()" id="incognito-btn"
+                class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                title="Toggle Private Mode" aria-pressed="false">
+                <i id="incognito-icon" class="fa-solid fa-user-secret text-gray-500 dark:text-gray-300 transition-colors"></i>
+            </button>
+
+            <!-- Theme Switcher -->
+            <div class="group relative z-30">
+                <button id="theme-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu"
+                    class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                    <i class="fa-solid fa-palette text-gray-500 dark:text-gray-300"></i>
+                </button>
+                <div id="theme-menu"
+                    class="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-cardbg rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 hidden group-hover:block overflow-hidden animate-fade-in z-50">
+                    <button onclick="App.switchTheme(event, 'theme-light')"
+                        class="w-full text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 border-b border-gray-100 dark:border-gray-700 transition-colors">
+                        <i class="fa-solid fa-sun mr-2 text-yellow-500"></i> Light (Gold)
+                    </button>
+                    <button onclick="App.switchTheme(event, 'theme-dark')"
+                        class="w-full text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 border-b border-gray-100 dark:border-gray-700 transition-colors">
+                        <i class="fa-solid fa-moon mr-2 text-blue-400"></i> Dark
+                    </button>
+                    <button onclick="App.switchTheme(event, 'theme-snow')"
+                        class="w-full text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 transition-colors">
+                        <i class="fa-solid fa-snowflake mr-2 text-sky-300"></i> Snowfall
+                    </button>
+                </div>
+            </div>
+
+            <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+            <button onclick="App.toggleModelModal()"
+                class="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-blue-100 transition-colors">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span id="active-count" class="text-blue-700 dark:text-blue-300">1 Active</span>
+            </button>
+
+            <button onclick="App.openSettings()"
+                class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                <i class="fa-solid fa-gear text-gray-500 dark:text-gray-300"></i>
+            </button>
+
+            <button onclick="App.logout()" title="Logout"
+                class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500">
+                <i class="fa-solid fa-power-off"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Chat Area -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 pb-32 scroll-smooth relative z-10">
+
+        <!-- Welcome / Empty State -->
+        <div id="welcome-screen"
+            class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 transition-opacity duration-300">
+            <div
+                class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-blue-500/20">
+                <i class="fa-solid fa-robot text-3xl text-white"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 dark:text-white">Start a new session</h2>
+            <p id="welcome-message" class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-8 text-sm">
+                Select your models and start chatting. Your history is securely saved to your access code.
+            </p>
+            <div class="flex gap-3">
+                <button onclick="App.toggleModelModal()"
+                    class="px-6 py-2 bg-gray-900 dark:bg-white dark:text-black text-white rounded-lg text-sm font-bold shadow-lg hover:transform hover:scale-105 transition-transform">
+                    Configure Models
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div id="messages" class="max-w-4xl mx-auto space-y-8 hidden pt-4">
+            <!-- Messages will be injected here -->
+        </div>
+    </main>
+
+    <!-- Input Area -->
+    <div
+        class="bg-white/80 dark:bg-darkbg/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 p-4 sticky bottom-0 z-30">
+        <div class="max-w-4xl mx-auto relative">
+            <div
+                class="flex items-end gap-2 bg-gray-50 dark:bg-cardbg p-2 rounded-2xl border border-gray-200 dark:border-gray-700 focus-within:border-blue-500 dark:focus-within:border-blue-500 transition-all shadow-sm">
+                <textarea id="user-input" rows="1" placeholder="Type a message..."
+                    class="w-full bg-transparent text-base p-2 outline-none resize-none max-h-40 text-gray-900 dark:text-gray-100 placeholder-gray-400"></textarea>
+                <button id="send-btn" onclick="App.sendMessage()" aria-label="Send message" disabled
+                    class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-blue-500/70">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="text-center mt-2">
+                <span class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider font-bold">HareramBot
+                    Elite v3.1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Model Manager -->
+    <div id="model-modal" class="fixed inset-0 z-[60] hidden modal-overlay">
+        <div class="absolute inset-0" onclick="App.toggleModelModal()"></div>
+        <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-cardbg rounded-2xl shadow-xl flex flex-col max-h-[85vh] overflow-hidden border border-gray-100 dark:border-gray-700 animate-fade-in">
+            <div
+                class="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-black/20">
+                <h3 class="font-bold text-lg dark:text-white">Manage Models</h3>
+                <button onclick="App.toggleModelModal()" class="text-gray-400 hover:text-red-500"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-4 bg-blue-50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-800">
+                <label class="text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400 mb-1 block">Add
+                    OpenRouter ID</label>
+                <div class="flex gap-2">
+                    <input type="text" id="custom-model-id" placeholder="vendor/model-name"
+                        class="flex-1 text-sm p-2 rounded border border-blue-200 dark:border-blue-800 dark:bg-cardbg dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="App.addCustomModel()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-xs font-bold transition-colors">
+                        Add
+                    </button>
+                </div>
+            </div>
+
+            <div id="model-list" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
+
+            <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-black/20 flex gap-2">
+                <button onclick="App.resetModels()"
+                    class="px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-xs transition-all">
+                    Reset
+                </button>
+                <button onclick="App.toggleModelModal()"
+                    class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 transition-all">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 z-[60] hidden modal-overlay">
+        <div class="absolute inset-0" onclick="App.closeSettings()"></div>
+        <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-cardbg rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-700 animate-fade-in">
+            <h3 class="font-bold text-lg mb-4 dark:text-white">Settings</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-1">OpenRouter API Key</label>
+                    <input type="password" id="api-key"
+                        class="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-cardbg dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase font-bold text-gray-500 mb-1">System Prompt</label>
+                    <textarea id="sys-prompt" rows="3"
+                        class="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-cardbg dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="App.resetData()"
+                        class="px-4 py-2 text-red-500 text-xs hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">Clear
+                        Session</button>
+                    <button onclick="App.saveSettings()"
+                        class="flex-1 py-2 bg-gray-900 dark:bg-white text-white dark:text-black font-bold rounded-lg">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Modal (Access Code) -->
+    <div id="auth-modal" class="fixed inset-0 z-[70] modal-overlay flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-cardbg rounded-3xl shadow-2xl w-full max-w-md overflow-hidden relative border border-gray-200 dark:border-gray-700 animate-fade-in">
+            <div class="h-32 bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
+                <i class="fa-solid fa-shield-halved text-5xl text-white/90"></i>
+            </div>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-center mb-2 dark:text-white">Welcome Back</h2>
+                <p class="text-gray-500 text-center text-sm mb-8">Enter your access code to retrieve your history, or
+                    generate a new one.</p>
+
+                <div class="space-y-4">
+                    <div class="relative">
+                        <input type="text" id="auth-code" placeholder="Enter Access Code" minlength="8" maxlength="32"
+                            pattern="[A-Za-z0-9]{8,}" autocapitalize="off" autocomplete="off" spellcheck="false"
+                            inputmode="text"
+                            class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-darkbg dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-center font-mono text-lg tracking-widest uppercase"
+                            onkeydown="if(event.key === 'Enter') App.handleLogin()">
+                        <i class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <p class="text-[11px] text-gray-400 text-center">Codes are at least 8 characters, letters and numbers
+                        only.</p>
+
+                    <button onclick="App.handleLogin()"
+                        class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 transition-all">
+                        Enter Workspace
+                    </button>
+
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+                        <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or</span>
+                        <div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+                    </div>
+
+                    <button onclick="App.generateCode()"
+                        class="w-full py-3 bg-gray-100 hover:bg-gray-200 dark:bg-darkbg dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold text-sm transition-all border border-gray-200 dark:border-gray-700">
+                        Generate New Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script src="script.js"></script>
+</body>
+
+</html>
