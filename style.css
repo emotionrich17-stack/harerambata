@@ -1,0 +1,233 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* --- Base --- */
+:root {
+    --font-main: 'Inter', sans-serif;
+}
+
+body {
+    font-family: var(--font-main);
+    line-height: 1.5;
+}
+
+#chat-container {
+    scrollbar-gutter: stable;
+}
+
+#user-input {
+    line-height: 1.5;
+}
+
+#send-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+/* --- Typography (Marked/Highlight.js overrides) --- */
+.prose pre {
+    background: #0f172a !important;
+    /* Always dark for code */
+    padding: 1rem;
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    color: #e2e8f0;
+    margin: 1rem 0;
+    border: 1px solid #1e293b;
+    font-size: 0.9em;
+}
+
+.prose code {
+    background: rgba(14, 165, 233, 0.1);
+    color: #0284c7;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.dark .prose code {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+}
+
+#messages .prose p {
+    margin: 0.45rem 0;
+}
+
+#messages .prose ul,
+#messages .prose ol {
+    margin: 0.45rem 0 0.7rem 1.25rem;
+}
+
+/* --- Typing Indicator --- */
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.typing-indicator .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: #94a3b8;
+    animation: typing 1.2s infinite;
+}
+
+.typing-indicator .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.typing-indicator .label {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.dark .typing-indicator .dot {
+    background: #64748b;
+}
+
+.dark .typing-indicator .label {
+    color: #94a3b8;
+}
+
+@keyframes typing {
+    0%,
+    80%,
+    100% {
+        opacity: 0.2;
+        transform: translateY(0);
+    }
+
+    40% {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* --- Themes --- */
+
+/* Snowfall Theme Overlay */
+#snow-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    /* Very low z-index to stay behind everything */
+    background: transparent;
+    display: none;
+}
+
+.theme-snow #snow-overlay {
+    display: block;
+}
+
+/* Snowflake Animation */
+.snowflake {
+    position: absolute;
+    top: -10px;
+    color: white;
+    font-size: 1em;
+    opacity: 0.6;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+/* Theme: Light (Gold Accent) */
+body.theme-light {
+    --bg-color: #ffffff;
+    --text-color: #1e293b;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Override specific elements for Gold theme if needed */
+body.theme-light .text-blue-600 {
+    color: #d97706 !important;
+}
+
+body.theme-light .bg-blue-600 {
+    background-color: #d97706 !important;
+}
+
+body.theme-light .focus-within\:border-blue-500:focus-within {
+    border-color: #d97706 !important;
+}
+
+body.theme-light .to-indigo-600 {
+    --tw-gradient-to: #b45309 !important;
+}
+
+/* Theme: Dark (Standard) */
+body.theme-dark {
+    background-color: #0f172a;
+    /* Slate 900 */
+    color: #f1f5f9;
+    /* Slate 100 */
+}
+
+/* Theme: Snow (Dark + Blue Tint) */
+body.theme-snow {
+    background-color: #0b1120;
+    /* Darker Blue */
+    color: #e2e8f0;
+}
+
+/* Modal Overlay backdrop filter */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
